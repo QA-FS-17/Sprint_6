@@ -1,6 +1,6 @@
-from .base_page import BasePage
+from base_page import BasePage
 from selenium.webdriver.support import expected_conditions as EC
-from ..locators.order_page_locators import OrderPageLocators
+from locators.order_page_locators import OrderPageLocators
 
 class OrderPage(BasePage):
     def fill_order_form(self, order_data):
