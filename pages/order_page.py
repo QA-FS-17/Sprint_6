@@ -1,69 +1,62 @@
-from base_page import BasePage
-from selenium.webdriver.support import expected_conditions as EC
+from pages.base_page import BasePage
 from locators.order_page_locators import OrderPageLocators
 
 class OrderPage(BasePage):
-    def fill_order_form(self, order_data):
-        self._fill_personal_data(order_data)
-        self._click_next_button()
-        self._fill_rental_data(order_data)
+    def fill_personal_info(self, name, last_name, address, phone, metro_station):
+        """Заполняет персональные данные с использованием методов BasePage"""
+        self.wait_for_element_visible(OrderPageLocators.NAME_INPUT).send_keys(name)
+        self.wait_for_element_visible(OrderPageLocators.LAST_NAME_INPUT).send_keys(last_name)
+        self.wait_for_element_visible(OrderPageLocators.ADDRESS_INPUT).send_keys(address)
+        self.wait_for_element_visible(OrderPageLocators.PHONE_INPUT).send_keys(phone)
+        self.select_metro_station(metro_station)
+        return self
+
+    def select_metro_station(self, station_name):
+        """Выбирает станцию метро с явными ожиданиями"""
+        self.wait_for_element_clickable(OrderPageLocators.METRO_INPUT).click()
+        station_locator = (OrderPageLocators.METRO_OPTION[0],
+                         OrderPageLocators.METRO_OPTION[1].format(station_name))
+        self.wait_for_element_clickable(station_locator).click()
+        return self
+
+    def go_to_rental_info(self):
+        """Переходит к данным аренды"""
+        self.wait_for_element_clickable(OrderPageLocators.NEXT_BUTTON).click()
+        return self
+
+    def fill_rental_info(self, date, period, color, comment=None):
+        """Заполняет данные аренды"""
+        self.wait_for_element_visible(OrderPageLocators.DELIVERY_DATE).send_keys(date)
+        self.select_rental_period(period)
+        self.select_scooter_color(color)
+        if comment:
+            self.wait_for_element_visible(OrderPageLocators.COMMENT_INPUT).send_keys(comment)
+        return self
+
+    def select_rental_period(self, period):
+        """Выбирает срок аренды"""
+        self.wait_for_element_clickable(OrderPageLocators.RENTAL_PERIOD).click()
+        period_locator = (OrderPageLocators.RENTAL_OPTION[0],
+                        OrderPageLocators.RENTAL_OPTION[1].format(period))
+        self.wait_for_element_clickable(period_locator).click()
+        return self
+
+    def select_scooter_color(self, color):
+        """Выбирает цвет самоката"""
+        locator = OrderPageLocators.COLOR_BLACK if color == "black" else OrderPageLocators.COLOR_GREY
+        self.wait_for_element_clickable(locator).click()
+        return self
+
+    def submit_order(self):
+        """Отправляет заказ"""
+        self.wait_for_element_clickable(OrderPageLocators.ORDER_BUTTON).click()
+        return self
 
     def confirm_order(self):
-        self.click(OrderPageLocators.ORDER_BUTTON, "Кнопка 'Заказать'")
-        self.click(OrderPageLocators.CONFIRM_BUTTON, "Кнопка подтверждения заказа")
+        """Подтверждает заказ"""
+        self.wait_for_element_clickable(OrderPageLocators.CONFIRM_BUTTON).click()
+        return self
 
-    def is_success_message_displayed(self):
-        return self.is_element_displayed(
-            OrderPageLocators.SUCCESS_MESSAGE,
-            "Сообщение об успешном оформлении"
-        )
-
-    def click_scooter_logo(self):
-        self.click(OrderPageLocators.SCOOTER_LOGO, "Логотип Самоката")
-
-    # Приватные вспомогательные методы
-    def _fill_personal_data(self, data):
-        self._input_text(OrderPageLocators.NAME_INPUT, data["name"], "Имя")
-        self._input_text(OrderPageLocators.LAST_NAME_INPUT, data["surname"], "Фамилия")
-        self._input_text(OrderPageLocators.ADDRESS_INPUT, data["address"], "Адрес")
-        self._input_text(OrderPageLocators.PHONE_INPUT, data["phone"], "Телефон")
-        self._select_metro(data["metro"])
-
-    def _fill_rental_data(self, data):
-        self._input_text(OrderPageLocators.DELIVERY_DATE, data["delivery_date"], "Дата доставки")
-        self._select_rental_period(data["rental_period"])
-        if data.get("color"):
-            self._select_color(data["color"])
-        if data.get("comment"):
-            self._input_text(OrderPageLocators.COMMENT_INPUT, data["comment"], "Комментарий")
-
-    def _click_next_button(self):
-        self.click(OrderPageLocators.NEXT_BUTTON, "Кнопка 'Далее'")
-
-    def _input_text(self, locator, text, field_name):
-        element = self.wait.until(
-            EC.visibility_of_element_located(locator),
-            message=f"Поле '{field_name}' не найдено"
-        )
-        element.clear()
-        element.send_keys(text)
-
-    def _select_metro(self, station_name):
-        self.click(OrderPageLocators.METRO_INPUT, "Поле выбора метро")
-        station_locator = (
-            OrderPageLocators.METRO_OPTION[0],
-            OrderPageLocators.METRO_OPTION[1].format(station_name)
-        )
-        self.click(station_locator, f"Станция метро '{station_name}'")
-
-    def _select_rental_period(self, period):
-        self.click(OrderPageLocators.RENTAL_PERIOD, "Поле 'Срок аренды'")
-        period_locator = (
-            OrderPageLocators.RENTAL_OPTION[0],
-            OrderPageLocators.RENTAL_OPTION[1].format(period)
-        )
-        self.click(period_locator, f"Период аренды '{period}'")
-
-    def _select_color(self, color):
-        color_locator = getattr(OrderPageLocators, f"COLOR_{color.upper()}")
-        self.click(color_locator, f"Цвет '{color}'")
+    def is_order_confirmed(self):
+        """Проверяет подтверждение заказа"""
+        return self.is_element_present(OrderPageLocators.SUCCESS_MESSAGE)

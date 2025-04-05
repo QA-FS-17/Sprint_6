@@ -4,25 +4,29 @@ from selenium.webdriver.support import expected_conditions as EC
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
-        self.wait = WebDriverWait(driver, 10)
 
-    def click(self, locator, element_name=""):
-        element = self.wait.until(
-            EC.element_to_be_clickable(locator),
-            message=f"Элемент '{element_name}' не стал кликабельным"
-        )
-        element.click()
+    def is_element_present(self, locator):
+        """Проверяет наличие элемента на странице без использования try-except"""
+        elements = self.driver.find_elements(*locator)
+        return len(elements) > 0 and elements[0].is_displayed()
 
-    def get_text(self, locator, element_name=""):
-        element = self.wait.until(
-            EC.visibility_of_element_located(locator),
-            message=f"Элемент '{element_name}' не отобразился"
-        )
-        return element.text
-
-    def is_element_displayed(self, locator, element_name=""):
-        element = self.wait.until(
+    def wait_for_element_present(self, locator, timeout=10):
+        """Явное ожидание появления элемента"""
+        return WebDriverWait(self.driver, timeout).until(
             EC.presence_of_element_located(locator),
-            message=f"Элемент '{element_name}' не найден на странице"
+            f"Элемент {locator} не появился за {timeout} секунд"
         )
-        return element.is_displayed()
+
+    def wait_for_element_visible(self, locator, timeout=10):
+        """Явное ожидание видимости элемента"""
+        return WebDriverWait(self.driver, timeout).until(
+            EC.visibility_of_element_located(locator),
+            f"Элемент {locator} не стал видимым за {timeout} секунд"
+        )
+
+    def wait_for_element_clickable(self, locator, timeout=10):
+        """Явное ожидание кликабельности элемента"""
+        return WebDriverWait(self.driver, timeout).until(
+            EC.element_to_be_clickable(locator),
+            f"Элемент {locator} не стал кликабельным за {timeout} секунд"
+        )
