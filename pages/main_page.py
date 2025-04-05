@@ -1,5 +1,7 @@
 from pages.base_page import BasePage
 from locators.main_page_locators import MainPageLocators
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 class MainPage(BasePage):
     def open(self):
@@ -31,3 +33,21 @@ class MainPage(BasePage):
     def is_main_page(self):
         current_url = self.driver.current_url
         return "qa-scooter.praktikum-services.ru" in current_url
+
+    class MainPage:
+        def __init__(self, driver):
+            self.driver = driver
+
+        def click(self, locator, description=None):
+            """Универсальный метод для клика по элементу"""
+            element = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable(locator),
+                message=f"Элемент {description or locator} не стал кликабельным"
+            )
+            element.click()
+
+        def click_question(self, question_num):
+            self.click(
+                MainPageLocators.QUESTION_LOCATORS[question_num],
+                f"Вопрос №{question_num + 1}"
+            )
