@@ -25,45 +25,42 @@ QUESTIONS_DATA = [
 @allure.epic("Тесты главной страницы")
 @allure.feature("Проверка FAQ")
 class TestQuestions:
-    @allure.title("Проверка ответа на вопрос №{question_num + 1} - '{expected_text:.30}...'")
+    @allure.title("Проверка ответа на вопрос №{question_num + 1}")
     @allure.description("""
-    Проверяем, что при клике на вопрос отображается корректный ответ.
+    Проверяем корректность ответа в разделе FAQ.
 
     **Тестовые данные:**
     - Номер вопроса: {question_num + 1}
     - Ожидаемый ответ: {expected_text}
-
-    **Шаги теста:**
-    1. Открыть главную страницу
-    2. Найти и нажать на вопрос №{question_num + 1}
-    3. Проверить текст ответа на соответствие ожидаемому
     """)
     @pytest.mark.parametrize("question_num, expected_text", QUESTIONS_DATA,
                              ids=[f"Вопрос {i + 1}" for i in range(len(QUESTIONS_DATA))])
     def test_question_dropdown(self, driver, question_num, expected_text):
-        with allure.step("Открываем главную страницу"):
-            main_page = MainPage(driver)
+        main_page = MainPage(driver)
+
+        with allure.step("1. Открыть главную страницу"):
             main_page.open()
             allure.attach(
                 driver.get_screenshot_as_png(),
-                name="Главная страница",
+                name="main_page_open",
                 attachment_type=allure.attachment_type.PNG
             )
 
-        with allure.step(f"Нажимаем на вопрос №{question_num + 1}"):
+        with allure.step(f"2. Кликнуть на вопрос №{question_num + 1}"):
             main_page.click_question(question_num)
             allure.attach(
                 driver.get_screenshot_as_png(),
-                name=f"После клика на вопрос {question_num + 1}",
+                name=f"question_{question_num}_clicked",
                 attachment_type=allure.attachment_type.PNG
             )
 
-        with allure.step("Проверяем текст ответа"):
+        with allure.step("3. Проверить текст ответа"):
             actual_text = main_page.get_answer_text(question_num)
             allure.attach(
-                f"Ожидаемый текст: {expected_text}\nФактический текст: {actual_text}",
-                name="Сравнение текстов",
+                f"Ожидаем: {expected_text}\nПолучено: {actual_text}",
+                name="text_comparison",
                 attachment_type=allure.attachment_type.TEXT
             )
+
             assert actual_text == expected_text, \
-                f"Ожидался ответ: '{expected_text}', но получен: '{actual_text}'"
+                f"Текст ответа не совпадает. Ожидалось: '{expected_text}', получено: '{actual_text}'"
