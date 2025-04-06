@@ -1,46 +1,124 @@
 from selenium.webdriver.common.by import By
-from .base_page import BasePage
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+import time
 
 
-class OrderPage(BasePage):
-    # Локаторы для первой страницы формы заказа
-    NAME_INPUT = (By.XPATH, "//input[@placeholder='* Имя']")
-    LAST_NAME_INPUT = (By.XPATH, "//input[@placeholder='* Фамилия']")
-    ADDRESS_INPUT = (By.XPATH, "//input[@placeholder='* Адрес: куда привезти заказ']")
-    METRO_STATION_INPUT = (By.XPATH, "//input[@placeholder='* Станция метро']")
-    METRO_STATION_ITEM = (By.XPATH, "//div[contains(@class, 'select-search__select')]//button")
-    PHONE_INPUT = (By.XPATH, "//input[@placeholder='* Телефон: на него позвонит курьер']")
-    NEXT_BUTTON = (By.XPATH, "//button[text()='Далее']")
+class OrderPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.wait = WebDriverWait(driver, 15)
 
-    # Локаторы для второй страницы формы заказа
-    DELIVERY_DATE_INPUT = (By.XPATH, "//input[@placeholder='* Когда привезти самокат']")
-    RENTAL_PERIOD_DROPDOWN = (By.XPATH, "//div[text()='* Срок аренды']")
-    RENTAL_PERIOD_OPTION = (By.XPATH, "//div[@class='Dropdown-option']")
-    COLOR_CHECKBOX = (By.XPATH, "//input[@type='checkbox']/..")
-    COMMENT_INPUT = (By.XPATH, "//input[@placeholder='Комментарий для курьера']")
-    ORDER_BUTTON = (By.XPATH, "//button[@class='Button_Button__ra12g Button_Middle__1CSJM' and text()='Заказать']")
+    def fill_personal_info(self, name, lastname, address, metro, phone):
+        """Заполнение персональной информации"""
+        self.wait.until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//div[contains(@class, 'Order_Form')]")
+            )
+        )
 
-    def fill_first_page(self, name, last_name, address, metro_station, phone):
-        self.input_text(self.NAME_INPUT, name)
-        self.input_text(self.LAST_NAME_INPUT, last_name)
-        self.input_text(self.ADDRESS_INPUT, address)
-        self.input_text(self.METRO_STATION_INPUT, metro_station)
-        self.click_element(self.METRO_STATION_ITEM)
-        self.input_text(self.PHONE_INPUT, phone)
-        self.click_element(self.NEXT_BUTTON)
+        self._fill_field("//input[@placeholder='* Имя']", name)
+        self._fill_field("//input[@placeholder='* Фамилия']", lastname)
+        self._fill_field("//input[@placeholder='* Адрес: куда привезти заказ']", address)
+        self._select_metro(metro)
+        self._fill_field("//input[@placeholder='* Телефон: на него позвонит курьер']", phone)
+        self._click("//button[text()='Далее']")
 
-    def fill_second_page(self, delivery_date, rental_period, color, comment):
-        self.input_text(self.DELIVERY_DATE_INPUT, delivery_date)
-        self.click_element(self.RENTAL_PERIOD_DROPDOWN)
-        rental_period_option = (
-        self.RENTAL_PERIOD_OPTION[0], f"//div[@class='Dropdown-option'][text()='{rental_period}']")
-        self.click_element(rental_period_option)
+    def fill_rental_details(self, date, period, color, comment=None):
+        """Заполнение данных аренды"""
+        self.wait.until(
+            EC.text_to_be_present_in_element(
+                (By.XPATH, "//div[contains(@class, 'Order_Header')]"),
+                "Про аренду"
+            )
+        )
 
-        if color:
-            color_locator = (self.COLOR_CHECKBOX[0], f"//input[@id='{color}']/..")
-            self.click_element(color_locator)
+        self._fill_field("//input[@placeholder='* Когда привезти самокат']", date)
+        self._select_dropdown("//div[contains(@class, 'Dropdown-control')]", period)
+        self._click(f"//input[@id='{color}']")
 
         if comment:
-            self.input_text(self.COMMENT_INPUT, comment)
+            self._fill_field("//input[@placeholder='Комментарий для курьера']", comment)
 
-        self.click_element(self.ORDER_BUTTON)
+        self._click("//button[contains(text(), 'Заказать')]")
+
+    def confirm_order(self):
+        """Подтверждение заказа"""
+        self._click("//button[text()='Да']")
+
+    def get_success_message(self):
+        """Получение сообщения об успешном заказе"""
+        return self.wait.until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//div[contains(@class, 'Order_ModalHeader')]")
+            )
+        ).text
+
+    # Вспомогательные методы
+    def _fill_field(self, xpath, value):
+        """Заполнение поля с проверкой"""
+        element = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, xpath))
+        )
+        self._scroll_to(element)
+        element.clear()
+        element.send_keys(value)
+        time.sleep(0.3)
+
+        if element.get_attribute('value') != value:
+            raise ValueError(f"Значение в поле {xpath} не установилось")
+
+    def _select_metro(self, station):
+        """Выбор станции метро"""
+        container = self.wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//div[contains(@class, 'select-search')]")
+            )
+        )
+        self._scroll_to(container)
+
+        input_field = container.find_element(By.TAG_NAME, "input")
+        input_field.click()
+        time.sleep(1)
+
+        station_xpath = f"//div[contains(@class, 'select-search__select')]//*[text()='{station}']"
+        station_btn = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH, station_xpath))
+        )
+        self._scroll_to(station_btn)
+        station_btn.click()
+        time.sleep(1)
+
+        if station not in input_field.get_attribute('value'):
+            raise ValueError(f"Станция {station} не выбрана")
+
+    def _select_dropdown(self, dropdown_xpath, option_text):
+        """Выбор из выпадающего списка"""
+        dropdown = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH, dropdown_xpath))
+        )
+        self._scroll_to(dropdown)
+        dropdown.click()
+        time.sleep(0.5)
+
+        option = self.wait.until(
+            EC.visibility_of_element_located(
+                (By.XPATH, f"//div[contains(@class, 'Dropdown-option') and text()='{option_text}']")
+            )
+        )
+        option.click()
+        time.sleep(0.5)
+
+    def _click(self, xpath):
+        """Клик по элементу"""
+        element = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH, xpath))
+        )
+        self._scroll_to(element)
+        element.click()
+        time.sleep(1)
+
+    def _scroll_to(self, element):
+        """Прокрутка к элементу"""
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        time.sleep(0.2)

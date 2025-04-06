@@ -1,0 +1,2 @@
+
+Test data: {'name': 'Мефодий', 'lastname': 'Меркушев', 'address': 'ул. Арбат, 1', 'metro': 'ВДНХ', 'phone': '+79854694538', 'date': '09.04.2025', 'rental_period': 'сутки', 'color': 'grey', 'comment': 'Монета появление падать тута висеть.'}
