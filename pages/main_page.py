@@ -1,34 +1,28 @@
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from .base_page import BasePage
-from locators.main_page_locators import MainPageLocators
+
 
 class MainPage(BasePage):
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.base_url = "https://qa-scooter.praktikum-services.ru/"
-        self.locators = MainPageLocators()
+    HEADER_ORDER_BUTTON = (By.XPATH, "//button[@class='Button_Button__ra12g']")
+    FOOTER_ORDER_BUTTON = (By.XPATH, "//button[@class='Button_Button__ra12g Button_Middle__1CSJM']")
+    COOKIE_BUTTON = (By.ID, "rcc-confirm-button")
+    YANDEX_LOGO = (By.XPATH, "//img[@alt='Yandex']")
+    SAMOKAT_LOGO = (By.XPATH, "//img[@alt='Scooter']")
 
-    def open(self):
-        self.driver.get(self.base_url)
-        self.wait.until(EC.visibility_of_element_located(self.locators.HEAD_ORDER_BUTTON))
-        return self
+    def click_header_order_button(self):
+        self.click_element(self.HEADER_ORDER_BUTTON)
 
-    def click_order_button(self, button_type="HEAD"):
-        locator = self.locators.HEAD_ORDER_BUTTON if button_type == "HEAD" else self.locators.FOOT_ORDER_BUTTON
-        button = self.wait.until(EC.element_to_be_clickable(locator))
-        self.scroll_to_element(button)
-        button.click()
-        return self
+    def click_footer_order_button(self):
+        self.find_element(self.FOOTER_ORDER_BUTTON)
+        self.driver.execute_script("arguments[0].scrollIntoView();",
+                                   self.find_element(self.FOOTER_ORDER_BUTTON))
+        self.click_element(self.FOOTER_ORDER_BUTTON)
 
-    def click_question(self, question_num):
-        question = self.wait.until(
-            EC.element_to_be_clickable(self.locators.QUESTION_LOCATORS[question_num])
-        )
-        self.scroll_to_element(question)
-        question.click()
-        return self
+    def accept_cookies(self):
+        self.click_element(self.COOKIE_BUTTON)
 
-    def get_answer_text(self, question_num):
-        return self.wait.until(
-            EC.visibility_of_element_located(self.locators.ANSWER_LOCATORS[question_num])
-        ).text
+    def click_yandex_logo(self):
+        self.click_element(self.YANDEX_LOGO)
+
+    def click_samokat_logo(self):
+        self.click_element(self.SAMOKAT_LOGO)

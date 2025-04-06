@@ -1,78 +1,46 @@
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from .base_page import BasePage
-from locators.order_page_locators import OrderPageLocators
+
 
 class OrderPage(BasePage):
-    def __init__(self, driver):
-        super().__init__(driver)
-        self.locators = OrderPageLocators()
+    NAME_INPUT = (By.XPATH, "//input[@placeholder='* Имя']")
+    LAST_NAME_INPUT = (By.XPATH, "//input[@placeholder='* Фамилия']")
+    ADDRESS_INPUT = (By.XPATH, "//input[@placeholder='* Адрес: куда привезти заказ']")
+    METRO_INPUT = (By.XPATH, "//input[@placeholder='* Станция метро']")
+    METRO_STATION_OPTION = (By.XPATH, "//div[@class='select-search__select']//button")
+    PHONE_INPUT = (By.XPATH, "//input[@placeholder='* Телефон: на него позвонит курьер']")
+    NEXT_BUTTON = (By.XPATH, "//button[text()='Далее']")
 
-    def fill_order_form(self, order_data):
-        self._input_text(self.locators.NAME_INPUT, order_data['name'])
-        self._input_text(self.locators.LASTNAME_INPUT, order_data['lastname'])
-        self._input_text(self.locators.ADDRESS_INPUT, order_data['address'])
-        self._select_metro_station(order_data['metro'])
-        self._input_phone(order_data['phone'])
-        self._click(self.locators.NEXT_BUTTON)
-        return self
+    # Second form
+    DATE_INPUT = (By.XPATH, "//input[@placeholder='* Когда привезти самокат']")
+    RENTAL_PERIOD_DROPDOWN = (By.XPATH, "//div[text()='* Срок аренды']")
+    RENTAL_PERIOD_OPTION = (By.XPATH, "//div[@class='Dropdown-option']")
+    COLOR_CHECKBOX = (By.XPATH, "//input[@class='Checkbox_Input__14A2w']")
+    COMMENT_INPUT = (By.XPATH, "//input[@placeholder='Комментарий для курьера']")
+    ORDER_BUTTON = (By.XPATH, "//button[@class='Button_Button__ra12g Button_Middle__1CSJM' and text()='Заказать']")
+    CONFIRM_ORDER_BUTTON = (By.XPATH, "//button[text()='Да']")
 
-    def fill_rental_details(self, order_data):
-        self._input_date(order_data['date'])
-        self._select_rental_period(order_data['rental_period'])
-        self._select_color(order_data['color'])
-        if order_data.get('comment'):
-            self._input_text(self.locators.COMMENT_INPUT, order_data['comment'])
-        return self
+    def fill_first_form(self, name, last_name, address, metro_station, phone):
+        self.find_element(self.NAME_INPUT).send_keys(name)
+        self.find_element(self.LAST_NAME_INPUT).send_keys(last_name)
+        self.find_element(self.ADDRESS_INPUT).send_keys(address)
+        self.find_element(self.METRO_INPUT).click()
+        metro_station_locator = (By.XPATH, f"//button/div[text()='{metro_station}']")
+        self.click_element(metro_station_locator)
+        self.find_element(self.PHONE_INPUT).send_keys(phone)
+        self.click_element(self.NEXT_BUTTON)
 
-    def confirm_order(self):
-        self._click(self.locators.ORDER_BUTTON)
-        self._click(self.locators.CONFIRM_BUTTON)
-        return self
+    def fill_second_form(self, date, rental_period, color, comment):
+        self.find_element(self.DATE_INPUT).send_keys(date)
+        self.click_element(self.RENTAL_PERIOD_DROPDOWN)
+        rental_period_locator = (By.XPATH, f"//div[@class='Dropdown-option' and text()='{rental_period}']")
+        self.click_element(rental_period_locator)
 
-    def is_success_message_displayed(self):
-        return self.wait.until(
-            EC.visibility_of_element_located(self.locators.SUCCESS_MESSAGE)
-        ).is_displayed()
+        if color.lower() == 'black':
+            self.click_element((By.ID, "black"))
+        elif color.lower() == 'grey':
+            self.click_element((By.ID, "grey"))
 
-    def _select_metro_station(self, station_name):
-        self._click(self.locators.METRO_INPUT)
-        search_input = self.wait.until(
-            EC.visibility_of_element_located((By.CLASS_NAME, 'select-search__input'))
-        )
-        search_input.send_keys(station_name[:3])
-        station = self.wait.until(
-            EC.element_to_be_clickable(
-                (By.XPATH, f"//div[contains(@class, 'select-search__option') and contains(., '{station_name}')]")
-            )
-        )
-        station.click()
-
-    def _select_rental_period(self, period):
-        self._click(self.locators.RENTAL_PERIOD)
-        option = self.wait.until(
-            EC.element_to_be_clickable(
-                (By.XPATH, f"//div[contains(@class, 'Dropdown-option') and contains(., '{period}')]")
-            )
-        )
-        option.click()
-
-    def _select_color(self, color):
-        locator = self.locators.COLOR_BLACK if color == 'black' else self.locators.COLOR_GREY
-        self._click(locator)
-
-    def _input_date(self, date):
-        self._input_text(self.locators.DATE_INPUT, date)
-
-    def _input_phone(self, phone):
-        self._input_text(self.locators.PHONE_INPUT, phone)
-
-    def _input_text(self, locator, text):
-        element = self.wait.until(EC.element_to_be_clickable(locator))
-        element.clear()
-        element.send_keys(text)
-
-    def _click(self, locator):
-        element = self.wait.until(EC.element_to_be_clickable(locator))
-        self.scroll_to_element(element)
-        element.click()
+        self.find_element(self.COMMENT_INPUT).send_keys(comment)
+        self.click_element(self.ORDER_BUTTON)
+        self.click_element(self.CONFIRM_ORDER_BUTTON)
