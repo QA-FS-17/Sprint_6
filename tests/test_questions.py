@@ -1,6 +1,7 @@
 import allure
 import pytest
 from pages.main_page import MainPage
+import time
 
 QUESTIONS_DATA = [
     (0, "Сутки — 400 рублей. Оплата курьеру — наличными или картой."),
@@ -22,24 +23,14 @@ QUESTIONS_DATA = [
 
 
 @allure.suite("Тесты раздела 'Вопросы о важном'")
-@allure.epic("Тесты главной страницы")
-@allure.feature("Проверка FAQ")
 class TestQuestions:
-    @allure.title("Проверка ответа на вопрос №{question_num + 1}")
-    @allure.description("""
-    Проверяем корректность ответа в разделе FAQ.
-
-    **Тестовые данные:**
-    - Номер вопроса: {question_num + 1}
-    - Ожидаемый ответ: {expected_text}
-    """)
-    @pytest.mark.parametrize("question_num, expected_text", QUESTIONS_DATA,
-                             ids=[f"Вопрос {i + 1}" for i in range(len(QUESTIONS_DATA))])
+    @pytest.mark.parametrize("question_num, expected_text", QUESTIONS_DATA)
     def test_question_dropdown(self, driver, question_num, expected_text):
         main_page = MainPage(driver)
 
         with allure.step("1. Открыть главную страницу"):
             main_page.open()
+            time.sleep(2)  # Даём время для загрузки
             allure.attach(
                 driver.get_screenshot_as_png(),
                 name="main_page_open",
@@ -48,6 +39,7 @@ class TestQuestions:
 
         with allure.step(f"2. Кликнуть на вопрос №{question_num + 1}"):
             main_page.click_question(question_num)
+            time.sleep(1)  # Ждём раскрытия ответа
             allure.attach(
                 driver.get_screenshot_as_png(),
                 name=f"question_{question_num}_clicked",
@@ -56,11 +48,5 @@ class TestQuestions:
 
         with allure.step("3. Проверить текст ответа"):
             actual_text = main_page.get_answer_text(question_num)
-            allure.attach(
-                f"Ожидаем: {expected_text}\nПолучено: {actual_text}",
-                name="text_comparison",
-                attachment_type=allure.attachment_type.TEXT
-            )
-
             assert actual_text == expected_text, \
-                f"Текст ответа не совпадает. Ожидалось: '{expected_text}', получено: '{actual_text}'"
+                f"Ожидалось: '{expected_text}', получено: '{actual_text}'"
