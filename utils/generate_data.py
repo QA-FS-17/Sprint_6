@@ -1,5 +1,5 @@
-from faker import Faker
 import random
+from faker import Faker
 from datetime import datetime, timedelta
 
 fake = Faker('ru_RU')

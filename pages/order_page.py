@@ -1,124 +1,84 @@
+import allure
+from pages.base_page import BasePage
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from locators.order_page_locators import OrderPageLocators
 from selenium.webdriver.support.wait import WebDriverWait
-import time
+from selenium.webdriver.support import expected_conditions as EC
 
+class OrderPage(BasePage):
+    @allure.step('Нажать на верхнюю кнопку "Заказать"')
+    def click_order_button_top(self):
+        self.click_on_element(OrderPageLocators.ORDER_BUTTON_TOP)
 
-class OrderPage:
-    def __init__(self, driver):
-        self.driver = driver
-        self.wait = WebDriverWait(driver, 15)
+    @allure.step('Нажать на нижнюю кнопку "Заказать"')
+    def click_order_button_bottom(self):
+        self.scroll_to_element(OrderPageLocators.ORDER_BUTTON_BOTTOM)
+        self.click_on_element(OrderPageLocators.ORDER_BUTTON_BOTTOM)
 
+    @allure.step('Заполнить персональную информацию')
     def fill_personal_info(self, name, lastname, address, metro, phone):
-        """Заполнение персональной информации"""
-        self.wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//div[contains(@class, 'Order_Form')]")
-            )
+        self.send_keys_to_input(OrderPageLocators.NAME_INPUT, name)
+        self.send_keys_to_input(OrderPageLocators.LASTNAME_INPUT, lastname)
+        self.send_keys_to_input(OrderPageLocators.ADDRESS_INPUT, address)
+        self.send_keys_to_input(OrderPageLocators.METRO_STATION, metro)
+        self.click_on_element((By.XPATH, f"//div[text()='{metro}']"))
+        self.send_keys_to_input(OrderPageLocators.PHONE_INPUT, phone)
+        self.click_on_element(OrderPageLocators.NEXT_BUTTON)
+
+    @allure.step('Заполнить данные аренды')
+    def fill_rental_details(self, date, period, color, comment):
+        # Заполняем дату
+        self.send_keys_to_input(OrderPageLocators.DATE_INPUT, date)
+
+        # Закрываем календарь кликом вне его области
+        # Клик по телу страницы
+        body = self.driver.find_element(By.TAG_NAME, 'body')
+        body.click()
+
+        # Ждем скрытия календаря
+        WebDriverWait(self.driver, 5).until(
+            EC.invisibility_of_element_located((By.CLASS_NAME, "react-datepicker"))
         )
 
-        self._fill_field("//input[@placeholder='* Имя']", name)
-        self._fill_field("//input[@placeholder='* Фамилия']", lastname)
-        self._fill_field("//input[@placeholder='* Адрес: куда привезти заказ']", address)
-        self._select_metro(metro)
-        self._fill_field("//input[@placeholder='* Телефон: на него позвонит курьер']", phone)
-        self._click("//button[text()='Далее']")
+        # Выбираем срок аренды
+        self.click_on_element(OrderPageLocators.RENTAL_PERIOD)
+        self.click_on_element((By.XPATH, f"//div[text()='{period}']"))
 
-    def fill_rental_details(self, date, period, color, comment=None):
-        """Заполнение данных аренды"""
-        self.wait.until(
-            EC.text_to_be_present_in_element(
-                (By.XPATH, "//div[contains(@class, 'Order_Header')]"),
-                "Про аренду"
-            )
-        )
+        # Выбираем цвет
+        if color == "black":
+            self.click_on_element(OrderPageLocators.COLOR_BLACK)
+        else:
+            self.click_on_element(OrderPageLocators.COLOR_GREY)
 
-        self._fill_field("//input[@placeholder='* Когда привезти самокат']", date)
-        self._select_dropdown("//div[contains(@class, 'Dropdown-control')]", period)
-        self._click(f"//input[@id='{color}']")
+        # Заполняем комментарий
+        self.send_keys_to_input(OrderPageLocators.COMMENT_INPUT, comment)
 
-        if comment:
-            self._fill_field("//input[@placeholder='Комментарий для курьера']", comment)
+        # Нажимаем кнопку заказа
+        self.click_on_element(OrderPageLocators.ORDER_BUTTON)
 
-        self._click("//button[contains(text(), 'Заказать')]")
-
+    @allure.step('Подтвердить заказ')
     def confirm_order(self):
-        """Подтверждение заказа"""
-        self._click("//button[text()='Да']")
+        self.click_on_element(OrderPageLocators.CONFIRM_BUTTON)
 
+    @allure.step('Получить сообщение об успешном заказе')
     def get_success_message(self):
-        """Получение сообщения об успешном заказе"""
-        return self.wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//div[contains(@class, 'Order_ModalHeader')]")
-            )
-        ).text
+        return self.get_text_on_element(OrderPageLocators.SUCCESS_MESSAGE)
 
-    # Вспомогательные методы
-    def _fill_field(self, xpath, value):
-        """Заполнение поля с проверкой"""
-        element = self.wait.until(
-            EC.visibility_of_element_located((By.XPATH, xpath))
+    @allure.step('Прокрутить страницу вниз')
+    def scroll_to_bottom(self):
+        # Сохраняем начальную позицию скролла
+        initial_offset = self.driver.execute_script("return window.pageYOffset;")
+
+        # Прокручиваем до конца
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        # Ожидаем либо изменения позиции скролла, либо появления кнопки
+        WebDriverWait(self.driver, 5).until(
+            lambda d: d.execute_script("return window.pageYOffset;") > initial_offset or
+                      d.find_element(*OrderPageLocators.ORDER_BUTTON_BOTTOM).is_displayed()
         )
-        self._scroll_to(element)
-        element.clear()
-        element.send_keys(value)
-        time.sleep(0.3)
 
-        if element.get_attribute('value') != value:
-            raise ValueError(f"Значение в поле {xpath} не установилось")
-
-    def _select_metro(self, station):
-        """Выбор станции метро"""
-        container = self.wait.until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//div[contains(@class, 'select-search')]")
-            )
+        # Дополнительная проверка видимости кнопки
+        WebDriverWait(self.driver, 3).until(
+            EC.visibility_of_element_located(OrderPageLocators.ORDER_BUTTON_BOTTOM)
         )
-        self._scroll_to(container)
-
-        input_field = container.find_element(By.TAG_NAME, "input")
-        input_field.click()
-        time.sleep(1)
-
-        station_xpath = f"//div[contains(@class, 'select-search__select')]//*[text()='{station}']"
-        station_btn = self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, station_xpath))
-        )
-        self._scroll_to(station_btn)
-        station_btn.click()
-        time.sleep(1)
-
-        if station not in input_field.get_attribute('value'):
-            raise ValueError(f"Станция {station} не выбрана")
-
-    def _select_dropdown(self, dropdown_xpath, option_text):
-        """Выбор из выпадающего списка"""
-        dropdown = self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, dropdown_xpath))
-        )
-        self._scroll_to(dropdown)
-        dropdown.click()
-        time.sleep(0.5)
-
-        option = self.wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, f"//div[contains(@class, 'Dropdown-option') and text()='{option_text}']")
-            )
-        )
-        option.click()
-        time.sleep(0.5)
-
-    def _click(self, xpath):
-        """Клик по элементу"""
-        element = self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, xpath))
-        )
-        self._scroll_to(element)
-        element.click()
-        time.sleep(1)
-
-    def _scroll_to(self, element):
-        """Прокрутка к элементу"""
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-        time.sleep(0.2)

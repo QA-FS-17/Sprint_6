@@ -1,66 +1,69 @@
-import pytest
 import allure
-from pages.main_page import MainPage
-from pages.order_page import OrderPage
-from utils.generate_data import generate_order_data
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
-@allure.feature('Order Flow')
-class TestOrderFlow:
-    @allure.title('Order from {entry_point}')
-    @pytest.mark.parametrize('entry_point', ['head', 'foot'])
-    def test_successful_order_flow(self, driver, entry_point):
-        order_data = generate_order_data()
-        allure.attach(str(order_data), name="Test Data", attachment_type=allure.attachment_type.TEXT)
+@allure.feature('Тесты заказа самоката')
+class TestOrderScooter:
+    @allure.title('Заказ через верхнюю кнопку')
+    def test_order_via_top_button(self, order_page, order_data):
+        with allure.step('1. Нажать верхнюю кнопку "Заказать"'):
+            order_page.click_order_button_top()
 
-        main_page = MainPage(driver)
-        order_page = OrderPage(driver)
+        self._complete_order_flow(order_page, order_data)
 
-        # Main page steps
-        main_page.open()
-        main_page.accept_cookies()
+    @allure.title('Заказ через нижнюю кнопку')
+    def test_order_via_bottom_button(self, order_page, order_data):
+        with allure.step('1. Прокрутить и нажать нижнюю кнопку "Заказать"'):
+            order_page.scroll_to_bottom()
+            order_page.click_order_button_bottom()
 
-        # Start order
-        if entry_point == 'head':
-            main_page.click_head_order_button()
-        else:
-            main_page.scroll_and_click_foot_order_button()
+        self._complete_order_flow(order_page, order_data)
 
-        # Fill forms
-        order_page.fill_personal_info(
-            order_data['name'],
-            order_data['lastname'],
-            order_data['address'],
-            order_data['metro'],
-            order_data['phone']
-        )
+    def _complete_order_flow(self, order_page, order_data):
+        with allure.step('2. Заполнить персональные данные'):
+            order_page.fill_personal_info(
+                name=order_data['name'],
+                lastname=order_data['lastname'],
+                address=order_data['address'],
+                metro=order_data['metro'],
+                phone=order_data['phone']
+            )
 
-        order_page.fill_rental_details(
-            order_data['date'],
-            order_data['rental_period'],
-            order_data['color'],
-            order_data.get('comment', '')
-        )
+        with allure.step('3. Заполнить данные аренды'):
+            order_page.fill_rental_details(
+                date=order_data['date'],
+                period=order_data['rental_period'],
+                color=order_data['color'],
+                comment=order_data['comment']
+            )
 
-        # Verify successful order
-        assert "Заказ оформлен" in order_page.confirm_and_verify_order()
+        with allure.step('4. Подтвердить заказ'):
+            order_page.confirm_order()
+
+        with allure.step('5. Проверить успешное оформление'):
+            assert "Заказ оформлен" in order_page.get_success_message()
 
 
-@allure.feature('Navigation')
-class TestNavigation:
-    @allure.title('Test {logo} logo')
-    @pytest.mark.parametrize('logo', ['scooter', 'yandex'])
-    def test_logo_navigation(self, driver, logo):
-        main_page = MainPage(driver)
-        main_page.open()
-        main_page.accept_cookies()
-
-        if logo == 'scooter':
+@allure.feature('Тесты логотипов')
+class TestLogos:
+    @allure.title('Проверка логотипа Самоката')
+    def test_scooter_logo_redirect(self, main_page, driver):
+        with allure.step('1. Нажать логотип Самоката'):
             main_page.click_scooter_logo()
-            assert main_page.is_on_main_page()
-        else:
+
+        with allure.step('2. Проверить переход на главную'):
+            assert driver.current_url == "https://qa-scooter.praktikum-services.ru/"
+
+    @allure.title('Проверка логотипа Яндекса')
+    def test_yandex_logo_redirect(self, main_page, driver):
+        with allure.step('1. Нажать логотип Яндекса'):
             main_page.click_yandex_logo()
-            main_page.switch_to_new_window()
+
+        with allure.step('2. Проверить открытие Дзена'):
+            WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) > 1)
+            driver.switch_to.window(driver.window_handles[1])
             WebDriverWait(driver, 10).until(EC.url_contains("dzen.ru"))
+            assert "dzen.ru" in driver.current_url
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
