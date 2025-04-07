@@ -1,45 +1,38 @@
+import allure
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
+
 
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
-        self.base_url = "https://qa-scooter.praktikum-services.ru/"
 
-    def find_element(self, locator, time=10):
-        return WebDriverWait(self.driver, time).until(
-            EC.presence_of_element_located(locator),
-            message=f"Can't find element by locator {locator}"
-        )
+    @allure.step("Ожидание видимости элемента")
+    def wait_for_element(self, locator, timeout=10):
+        return WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
 
-    def find_elements(self, locator, time=10):
-        return WebDriverWait(self.driver, time).until(
-            EC.presence_of_all_elements_located(locator),
-            message=f"Can't find elements by locator {locator}"
-        )
+    @allure.step("Прокрутить до элемента")
+    def scroll_to_element(self, locator, timeout=10):
+        element = self.wait_for_element(locator, timeout)
+        self.driver.execute_script("arguments[0].scrollIntoView();", element)
 
-    def go_to_site(self):
-        return self.driver.get(self.base_url)
+    @allure.step("Нажать на элемент")
+    def click_on_element(self, locator, timeout=10):
+        element = self.wait_for_element(locator, timeout)
+        element.click()
 
-    def click_element(self, locator):
-        self.find_element(locator).click()
-
-    def input_text(self, locator, text):
-        element = self.find_element(locator)
+    @allure.step("Ввести текст в поле ввода")
+    def send_keys_to_input(self, locator, keys, timeout=10):
+        element = self.wait_for_element(locator, timeout)
         element.clear()
-        element.send_keys(text)
+        element.send_keys(keys)
 
-    def wait_for_visibility(self, locator, timeout=10):
+    @allure.step("Получить текст элемента")
+    def get_text_on_element(self, locator, timeout=10):
+        element = self.wait_for_element(locator, timeout)
+        return element.text
+
+    @allure.step("Подождать и проверить, что атрибут элемента содержит текст")
+    def wait_for_attribute(self, locator, attribute, value, timeout=10):
         return WebDriverWait(self.driver, timeout).until(
-            EC.visibility_of_element_located(locator)
-        )
-
-    def wait_for_clickable(self, locator, timeout=10):
-        return WebDriverWait(self.driver, timeout).until(
-            EC.element_to_be_clickable(locator)
-        )
-
-    def scroll_to_element(self, element):
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-        time.sleep(0.5)
+            EC.text_to_be_present_in_element_attribute(locator, attribute, value))

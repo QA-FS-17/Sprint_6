@@ -1,2 +1,0 @@
-
-Test data: {'name': 'Никифор', 'lastname': 'Егорова', 'address': 'ул. Арбат, 1', 'metro': 'Сокольники', 'phone': '+79371888765', 'date': '09.04.2025', 'rental_period': 'двое суток', 'color': 'grey', 'comment': 'Степь провал парень порог.'}
