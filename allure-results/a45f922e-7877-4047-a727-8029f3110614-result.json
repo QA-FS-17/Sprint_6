@@ -1,0 +1,1 @@
+{"name": "Заказ через нижнюю кнопку", "status": "skipped", "start": 1744227246423, "stop": 1744227246423, "uuid": "5e571164-e6ec-4280-b1f1-6760c0afc57a", "testCaseId": "0f34b9082c30fd59b40583358211e2d5", "fullName": "tests.test_order_scooter.TestOrderScooter#test_order_via_bottom_button"}

@@ -1,3 +1,5 @@
+# utils\generate_data.py
+
 import random
 from faker import Faker
 from datetime import datetime, timedelta
