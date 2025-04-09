@@ -4,48 +4,33 @@ from selenium.webdriver.common.by import By
 class OrderPageLocators:
     """Локаторы для страницы оформления заказа"""
 
-    # ===== Локаторы первой страницы формы =====
+    # Кнопки вызова формы заказа (главная страница)
+    ORDER_BUTTON_TOP = (By.XPATH,
+                        "//button[contains(@class, 'Button_Button__ra12g') and not(contains(@class, 'Button_Middle')) and contains(text(), 'Заказать')]")
+    ORDER_BUTTON_BOTTOM = (
+    By.XPATH, "//button[contains(@class, 'Button_Middle__1CSJM') and contains(text(), 'Заказать')]")
+
+    # Первая страница формы
     NAME_INPUT = (By.XPATH, "//input[@placeholder='* Имя']")
     LASTNAME_INPUT = (By.XPATH, "//input[@placeholder='* Фамилия']")
     ADDRESS_INPUT = (By.XPATH, "//input[@placeholder='* Адрес: куда привезти заказ']")
-
-    # Локатор поля метро + вариант выбора станции
-    METRO_STATION = (By.XPATH, "//input[@placeholder='* Станция метро']")
-    METRO_STATION_OPTION = (By.XPATH, "//div[contains(@class, 'select-search__option')]")
-
+    METRO_STATION_INPUT = (By.XPATH, "//input[@placeholder='* Станция метро']")
     PHONE_INPUT = (By.XPATH, "//input[@placeholder='* Телефон: на него позвонит курьер']")
     NEXT_BUTTON = (By.XPATH, "//button[text()='Далее']")
 
-    # ===== Локаторы второй страницы формы =====
+    # Вторая страница формы
     DATE_INPUT = (By.XPATH, "//input[@placeholder='* Когда привезти самокат']")
-    DATE_INPUT_LABEL = (By.XPATH, "//label[contains(text(), 'Когда привезти самокат')]")
-
-    # Локаторы для выбора срока аренды
     RENTAL_PERIOD = (By.XPATH, "//div[contains(@class, 'Dropdown-control')]")
-    RENTAL_PERIOD_OPTION = (By.XPATH, "//div[contains(@class, 'Dropdown-option')]")
-
-    # Локаторы цветов
-    COLOR_BLACK = (By.ID, "black")  # Чёрный самокат
-    COLOR_GREY = (By.ID, "grey")  # Серый самокат
-
+    COLOR_BLACK = (By.ID, "black")
+    COLOR_GREY = (By.ID, "grey")
     COMMENT_INPUT = (By.XPATH, "//input[@placeholder='Комментарий для курьера']")
-    ORDER_BUTTON = (By.XPATH, '//button[contains(@class, "Button_Button__ra12g") and contains(@class, "Button_Middle__1CSJM") and text()="Заказать"]')
+    FINAL_ORDER_BUTTON = (By.XPATH, "//div[contains(@class, 'Order_Buttons')]//button[text()='Заказать']")
 
-    # ===== Кнопки заказа на главной =====
-    ORDER_BUTTON_TOP = (
-        By.XPATH,
-        "//button[contains(text(), 'Заказать') and @class='Button_Button__ra12g']"
-    )
-    ORDER_BUTTON_BOTTOM = (
-        By.XPATH,
-        "//button[contains(text(), 'Заказать') and @class='Button_Button__ra12g Button_Middle__1CSJM']"
-    )
-
-    # ===== Локаторы модального окна =====
-    MODAL_WINDOW = (By.XPATH, "//div[contains(@class, 'Order_Modal')]")
+    # Модальное окно
     CONFIRM_BUTTON = (By.XPATH, "//button[text()='Да']")
     SUCCESS_MESSAGE = (By.XPATH, "//div[contains(text(), 'Заказ оформлен')]")
 
-    # Дополнительные локаторы для календаря
+    # Дополнительные элементы
     DATE_PICKER = (By.CLASS_NAME, "react-datepicker")
-    DATE_PICKER_DAY = (By.CLASS_NAME, "react-datepicker__day--selected")
+    METRO_OPTION = (By.XPATH, "//div[contains(@class, 'select-search__option') and text()='{}']")
+    RENTAL_OPTION = (By.XPATH, "//div[contains(@class, 'Dropdown-option') and text()='{}']")

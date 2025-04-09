@@ -1,7 +1,6 @@
 import allure
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
+import pytest
+from data import TestData
 
 @allure.feature('Тесты заказа самоката')
 class TestOrderScooter:
@@ -44,26 +43,22 @@ class TestOrderScooter:
         with allure.step('5. Проверить успешное оформление'):
             assert "Заказ оформлен" in order_page.get_success_message()
 
-
 @allure.feature('Тесты логотипов')
 class TestLogos:
     @allure.title('Проверка логотипа Самоката')
-    def test_scooter_logo_redirect(self, main_page, driver):
+    def test_scooter_logo_redirect(self, main_page):
         with allure.step('1. Нажать логотип Самоката'):
             main_page.click_scooter_logo()
 
         with allure.step('2. Проверить переход на главную'):
-            assert driver.current_url == "https://qa-scooter.praktikum-services.ru/"
+            assert main_page.is_url_matches("https://qa-scooter.praktikum-services.ru/")
 
     @allure.title('Проверка логотипа Яндекса')
-    def test_yandex_logo_redirect(self, main_page, driver):
+    def test_yandex_logo_redirect(self, main_page):
         with allure.step('1. Нажать логотип Яндекса'):
             main_page.click_yandex_logo()
 
         with allure.step('2. Проверить открытие Дзена'):
-            WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) > 1)
-            driver.switch_to.window(driver.window_handles[1])
-            WebDriverWait(driver, 10).until(EC.url_contains("dzen.ru"))
-            assert "dzen.ru" in driver.current_url
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+            main_page.switch_to_new_window()
+            assert main_page.is_url_contains("dzen.ru")
+            main_page.close_current_window_and_switch_back()
