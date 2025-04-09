@@ -1,3 +1,5 @@
+# data.py
+
 class TestData:
     """Данные для тестирования раздела FAQ"""
     QUESTIONS_AND_ANSWERS = [
