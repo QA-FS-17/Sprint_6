@@ -1,4 +1,4 @@
-# test_order_scooter.py
+# tests\test_order_scooter.py
 
 import allure
 
