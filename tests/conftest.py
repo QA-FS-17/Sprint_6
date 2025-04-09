@@ -6,7 +6,7 @@ from selenium.webdriver.firefox.options import Options
 from pages.order_page import OrderPage
 from pages.main_page import MainPage
 from utils.generate_data import generate_order_data
-from config import Urls
+from tests.config import Urls
 
 
 @pytest.fixture

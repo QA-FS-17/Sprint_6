@@ -1,6 +1,7 @@
 # tests\test_order_scooter.py
 
 import allure
+from .order_helpers import complete_order_flow  # Импорт общего метода
 
 
 @allure.feature('Тесты заказа самоката')
@@ -13,7 +14,7 @@ class TestOrderScooter:
         with allure.step('1. Нажать верхнюю кнопку "Заказать"'):
             order_page.click_order_button_top()
 
-        self._complete_order_flow(order_page, order_data)
+        complete_order_flow(order_page, order_data)  # Используем импортированный метод
 
     @allure.title('Заказ через нижнюю кнопку')
     def test_order_via_bottom_button(self, order_page, order_data):
@@ -23,36 +24,7 @@ class TestOrderScooter:
         with allure.step('1. Нажать нижнюю кнопку "Заказать"'):
             order_page.click_order_button_bottom()
 
-        self._complete_order_flow(order_page, order_data)
-
-    def _complete_order_flow(self, order_page, order_data):
-        """
-        Общий метод для выполнения полного потока заказа
-        """
-        with allure.step('2. Заполнить персональные данные'):
-            order_page.fill_personal_info(
-                name=order_data['name'],
-                lastname=order_data['lastname'],
-                address=order_data['address'],
-                metro=order_data['metro'],
-                phone=order_data['phone']
-            )
-
-        with allure.step('3. Заполнить данные аренды'):
-            order_page.fill_rental_details(
-                date=order_data['date'],
-                period=order_data['rental_period'],
-                color=order_data['color'],
-                comment=order_data['comment']
-            )
-
-        with allure.step('4. Подтвердить заказ'):
-            order_page.confirm_order()
-
-        with allure.step('5. Проверить успешное оформление'):
-            success_message = order_page.get_success_message()
-            assert "Заказ оформлен" in success_message, \
-                f"Ожидалось сообщение 'Заказ оформлен', получено: '{success_message}'"
+        complete_order_flow(order_page, order_data)  # Используем импортированный метод
 
 
 @allure.feature('Тесты логотипов')
@@ -80,16 +52,9 @@ class TestLogos:
             main_page.click_yandex_logo()
 
         with allure.step('2. Проверить открытие Дзена'):
-            # Переключаемся на новое окно
             main_page.switch_to_new_window()
-
-            # Явное ожидание загрузки страницы
             main_page.wait_for_url_contains("dzen.ru", timeout=15)
-
-            # Проверяем URL
             current_url = main_page.get_current_url().lower()
             assert "dzen.ru" in current_url, \
                 f"URL должен содержать 'dzen.ru', текущий URL: {current_url}"
-
-            # Закрываем окно и возвращаемся назад
             main_page.close_current_window_and_switch_back()

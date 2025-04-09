@@ -1,4 +1,4 @@
-# data.py
+# faq_data.py
 
 class TestData:
     """Данные для тестирования раздела FAQ"""
