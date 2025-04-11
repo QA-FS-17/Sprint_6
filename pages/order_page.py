@@ -84,6 +84,10 @@ class OrderPage(BasePage):
         self.wait_for_element(OrderPageLocators.CONFIRM_BUTTON)
         self.click_on_element(OrderPageLocators.CONFIRM_BUTTON)
 
-    @allure.step('Получить сообщение об успешном заказе')
+    def is_order_successful(self):
+        """Проверяет успешность заказа по наличию модального окна"""
+        return self.is_element_present(OrderPageLocators.ORDER_SUCCESS_MODAL)
+
     def get_success_message(self):
-        return self.wait_for_element(OrderPageLocators.SUCCESS_MESSAGE).text
+        """Возвращает текст сообщения об успешном заказе"""
+        return self.wait_for_element(OrderPageLocators.ORDER_SUCCESS_MODAL).text

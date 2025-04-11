@@ -1,7 +1,7 @@
-# tests\test_order_scooter.py
+# test_order_scooter.py
 
 import allure
-from helpers.order_helpers import complete_order_flow  # Импорт общего метода
+from helpers.order_helpers import complete_order_flow
 
 
 @allure.feature('Тесты заказа самоката')
@@ -14,7 +14,10 @@ class TestOrderScooter:
         with allure.step('1. Нажать верхнюю кнопку "Заказать"'):
             order_page.click_order_button_top()
 
-        complete_order_flow(order_page, order_data)  # Используем импортированный метод
+        complete_order_flow(order_page, order_data)
+
+        with allure.step('Проверить успешное оформление заказа'):
+            assert order_page.is_order_successful(), "Заказ не был успешно оформлен"
 
     @allure.title('Заказ через нижнюю кнопку')
     def test_order_via_bottom_button(self, order_page, order_data):
@@ -24,7 +27,10 @@ class TestOrderScooter:
         with allure.step('1. Нажать нижнюю кнопку "Заказать"'):
             order_page.click_order_button_bottom()
 
-        complete_order_flow(order_page, order_data)  # Используем импортированный метод
+        complete_order_flow(order_page, order_data)
+
+        with allure.step('Проверить успешное оформление заказа'):
+            assert order_page.is_order_successful(), "Заказ не был успешно оформлен"
 
 
 @allure.feature('Тесты логотипов')
@@ -39,22 +45,21 @@ class TestLogos:
 
         with allure.step('2. Проверить переход на главную'):
             expected_url = "https://qa-scooter.praktikum-services.ru/"
-            current_url = main_page.get_current_url()
-            assert current_url == expected_url, \
-                f"Ожидался URL: {expected_url}, получен: {current_url}"
+            assert main_page.get_current_url() == expected_url
 
-    @allure.title('Проверка логотипа Яндекса')
-    def test_yandex_logo_redirect(self, main_page):
-        """
-        Тест проверяет переход на Дзен при клике на логотип Яндекса
-        """
-        with allure.step('1. Нажать логотип Яндекса'):
-            main_page.click_yandex_logo()
+    @allure.feature('Тесты логотипов')
+    class TestLogos:
+        @allure.title('Проверка логотипа Яндекса')
+        def test_yandex_logo_redirect(self, main_page, request):
+            """
+            Тест проверяет переход на Дзен при клике на логотип Яндекса
+            """
+            request.node.window_opened = True  # Помечаем тест для финализатора
 
-        with allure.step('2. Проверить открытие Дзена'):
-            main_page.switch_to_new_window()
-            main_page.wait_for_url_contains("dzen.ru", timeout=15)
-            current_url = main_page.get_current_url().lower()
-            assert "dzen.ru" in current_url, \
-                f"URL должен содержать 'dzen.ru', текущий URL: {current_url}"
-            main_page.close_current_window_and_switch_back()
+            with allure.step('1. Нажать логотип Яндекса'):
+                main_page.click_yandex_logo()
+
+            with allure.step('2. Проверить открытие Дзена'):
+                main_page.switch_to_new_window()
+                main_page.wait_for_url_contains("dzen.ru", timeout=15)
+                assert "dzen.ru" in main_page.get_current_url().lower()

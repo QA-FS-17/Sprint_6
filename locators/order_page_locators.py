@@ -35,7 +35,7 @@ class OrderPageLocators:
     # Модальное окно
     CONFIRM_MODAL = (By.CLASS_NAME, "Order_Modal__YZ-d3")
     CONFIRM_BUTTON = (By.XPATH, "//button[text()='Да']")
-    SUCCESS_MESSAGE = (By.XPATH, "//div[contains(@class, 'Order_ModalHeader')]")
+    ORDER_SUCCESS_MODAL = (By.XPATH, "//div[contains(text(), 'Заказ оформлен')]")
 
     # Дополнительные элементы
     BODY = (By.TAG_NAME, "body")
