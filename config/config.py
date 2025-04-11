@@ -3,5 +3,5 @@
 # Конфигурация URLs
 class Urls:
     BASE = "https://qa-scooter.praktikum-services.ru"
-    MAIN = BASE
+    MAIN = f"{BASE}/"
     ORDER = f"{BASE}/order"

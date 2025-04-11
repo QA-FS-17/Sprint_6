@@ -2,7 +2,7 @@
 
 import allure
 from helpers.order_helpers import complete_order_flow
-
+from config.config import Urls
 
 @allure.feature('Тесты заказа самоката')
 class TestOrderScooter:
@@ -44,7 +44,7 @@ class TestLogos:
             main_page.click_scooter_logo()
 
         with allure.step('2. Проверить переход на главную'):
-            expected_url = "https://qa-scooter.praktikum-services.ru/"
+            expected_url = Urls.MAIN
             assert main_page.get_current_url() == expected_url
 
     @allure.feature('Тесты логотипов')
@@ -54,8 +54,6 @@ class TestLogos:
             """
             Тест проверяет переход на Дзен при клике на логотип Яндекса
             """
-            request.node.window_opened = True  # Помечаем тест для финализатора
-
             with allure.step('1. Нажать логотип Яндекса'):
                 main_page.click_yandex_logo()
 
