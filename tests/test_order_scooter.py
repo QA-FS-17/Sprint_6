@@ -1,7 +1,7 @@
 # tests\test_order_scooter.py
 
 import allure
-from .order_helpers import complete_order_flow  # Импорт общего метода
+from helpers.order_helpers import complete_order_flow  # Импорт общего метода
 
 
 @allure.feature('Тесты заказа самоката')

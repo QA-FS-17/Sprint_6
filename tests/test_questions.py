@@ -2,7 +2,7 @@
 
 import pytest
 import allure
-from tests.faq_data import TestData
+from config.faq_data import TestData
 
 
 @allure.feature('Тесты FAQ')
