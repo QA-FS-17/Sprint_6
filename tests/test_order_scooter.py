@@ -47,17 +47,15 @@ class TestLogos:
             expected_url = Urls.MAIN
             assert main_page.get_current_url() == expected_url
 
-    @allure.feature('Тесты логотипов')
-    class TestLogos:
-        @allure.title('Проверка логотипа Яндекса')
-        def test_yandex_logo_redirect(self, main_page, request):
-            """
-            Тест проверяет переход на Дзен при клике на логотип Яндекса
-            """
-            with allure.step('1. Нажать логотип Яндекса'):
-                main_page.click_yandex_logo()
+    @allure.title('Проверка логотипа Яндекса')
+    def test_yandex_logo_redirect(self, main_page, request):
+        """
+        Тест проверяет переход на Дзен при клике на логотип Яндекса
+        """
+        with allure.step('1. Нажать логотип Яндекса'):
+            main_page.click_yandex_logo()
 
-            with allure.step('2. Проверить открытие Дзена'):
-                main_page.switch_to_new_window()
-                main_page.wait_for_url_contains("dzen.ru", timeout=15)
-                assert "dzen.ru" in main_page.get_current_url().lower()
+        with allure.step('2. Проверить открытие Дзена'):
+            main_page.switch_to_new_window()
+            main_page.wait_for_url_contains("dzen.ru", timeout=15)
+            assert "dzen.ru" in main_page.get_current_url().lower()
