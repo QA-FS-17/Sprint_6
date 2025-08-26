@@ -1,0 +1,21 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","393","Проверка ответов в FAQ","tests","Fri Apr 11 17:16:28 MSK 2025","passed","Fri Apr 11 17:16:29 MSK 2025","TestFAQ","test_questions","",""
+"
+Тест проверяет переход на главную страницу при клике на логотип Самоката
+","287","Проверка логотипа Самоката","tests","Fri Apr 11 17:16:05 MSK 2025","passed","Fri Apr 11 17:16:05 MSK 2025","TestLogos","test_order_scooter","",""
+"","396","Проверка ответов в FAQ","tests","Fri Apr 11 17:16:40 MSK 2025","passed","Fri Apr 11 17:16:41 MSK 2025","TestFAQ","test_questions","",""
+"","388","Проверка ответов в FAQ","tests","Fri Apr 11 17:17:38 MSK 2025","passed","Fri Apr 11 17:17:39 MSK 2025","TestFAQ","test_questions","",""
+"","405","Проверка ответов в FAQ","tests","Fri Apr 11 17:17:50 MSK 2025","passed","Fri Apr 11 17:17:50 MSK 2025","TestFAQ","test_questions","",""
+"","392","Проверка ответов в FAQ","tests","Fri Apr 11 17:17:15 MSK 2025","passed","Fri Apr 11 17:17:15 MSK 2025","TestFAQ","test_questions","",""
+"","398","Проверка ответов в FAQ","tests","Fri Apr 11 17:17:03 MSK 2025","passed","Fri Apr 11 17:17:04 MSK 2025","TestFAQ","test_questions","",""
+"
+Тест проверяет полный процесс оформления заказа через нижнюю кнопку
+","5000","Заказ через нижнюю кнопку","tests","Fri Apr 11 17:15:48 MSK 2025","passed","Fri Apr 11 17:15:53 MSK 2025","TestOrderScooter","test_order_scooter","",""
+"
+Тест проверяет переход на Дзен при клике на логотип Яндекса
+","647","Проверка логотипа Яндекса","tests","Fri Apr 11 17:16:16 MSK 2025","passed","Fri Apr 11 17:16:17 MSK 2025","TestLogos","test_order_scooter","",""
+"","404","Проверка ответов в FAQ","tests","Fri Apr 11 17:17:26 MSK 2025","passed","Fri Apr 11 17:17:27 MSK 2025","TestFAQ","test_questions","",""
+"
+Тест проверяет полный процесс оформления заказа через верхнюю кнопку
+","5150","Заказ через верхнюю кнопку","tests","Fri Apr 11 17:15:32 MSK 2025","passed","Fri Apr 11 17:15:37 MSK 2025","TestOrderScooter","test_order_scooter","",""
+"","384","Проверка ответов в FAQ","tests","Fri Apr 11 17:16:52 MSK 2025","passed","Fri Apr 11 17:16:52 MSK 2025","TestFAQ","test_questions","",""
